@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Public Gallery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" sizes="any"        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>"/>
+    <script type="module" crossorigin src="/assets/main-DGHVPs9a.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/main-CUDHiuc1.css">
+  </head>
+
+  <body>
+    <header class="topbar">
+      <h1>The Metropolitan Museum of Codédex </h1>
+      <nav class="nav">
+        <a class="link" href="/gallery.html">View full gallery</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <h2 class="sectionTitle">Draw</h2>
+
+        <div class="controls">
+          <div id="palette" class="palette" aria-label="Color palette"></div>
+
+          <div class="controlRow">
+            <label class="label">
+              Brush
+              <input id="brushSize" type="range" min="2" max="50" value="6" />
+            </label>
+
+            <button id="clear" class="btn secondary" type="button">Clear</button>
+            <button id="submit" class="btn" type="button">Send to gallery</button>
+          </div>
+
+          <input id="caption" class="captionInput" type="text" placeholder="Art piece title" maxlength="140" />
+          <!-- <div id="status" class="status" aria-live="polite"></div> -->
+        </div>
+
+        <canvas id="canvas" width="512" height="512"></canvas>
+      </section>
+
+      <section class="panel">
+        <h2 class="sectionTitle">Recent additions</h2>
+        <div id="gallery" class="galleryGrid"></div>
+      </section>
+    </main>
+
+    <script>
+      window.GALLERY_LIMIT = 8;        // homepage: 8 newest
+      window.GALLERY_RANDOM = false;  // keep newest on homepage
+    </script>
+  </body>
+</html>
