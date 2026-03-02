@@ -1,262 +1,279 @@
-/* =========================
-   Global / page styling
-========================= */
-
-:root {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+:root{
+  --wall:#f8f6f2;
+  --text:#111;
+  --muted:rgba(0,0,0,.55);
+  --line:rgba(0,0,0,.10);
 }
 
-* { box-sizing: border-box; }
+*{ box-sizing:border-box; }
 
-body {
-  margin: 0;
-  padding: 20px;
-  background: #ffe1ef;
-  color: #111;
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  background:var(--wall);
+  color:var(--text);
+  font-family: "Playfair Display", serif;
 }
 
-h1, h2 {
-  margin: 0 0 10px 0;
+/* ===== Top bar ===== */
+.topbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 24px;
+  border-bottom:1px solid var(--line);
+  background:#cb1818;
+  color: white;
 }
 
-header {
-  max-width: 1100px;
-  margin: 0 auto 16px auto;
+.topbar {
+  margin:0;
+  font-size:18px;
+  letter-spacing:.2px;
 }
 
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+h1 { font-size: 40px; }
+
+a { 
+  font-size: 24px; 
+  color: white;
+  text-decoration: none;
 }
 
-@media (max-width: 900px) {
-  .container { grid-template-columns: 1fr; }
+/* ===== Layout ===== */
+.layout{
+  max-width:1200px;
+  margin:30px auto;
+  padding:0 20px 40px;
+  display:grid;
+  grid-template-columns:1fr 1.2fr;
+  gap:40px;
 }
 
-.card {
-  background: rgba(255,255,255,0.9);
-  border-radius: 18px;
-  padding: 14px;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.10);
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr; }
 }
 
-/* =========================
-   Drawing area
-========================= */
-
-.toolbar {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
+.page{
+  max-width:1200px;
+  margin:30px auto;
+  padding:0 20px 40px;
 }
 
-.toolbar input[type="text"],
-.toolbar input[type="range"],
-.toolbar input[type="color"] {
-  accent-color: #111;
+.sectionTitle{
+  margin:0 0 12px 0;
+  font-size:30px;
+  font-weight:800;
 }
 
-.btn {
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 0;
-  cursor: pointer;
-  background: #111;
-  color: #fff;
-  font-weight: 700;
+.status{
+  margin-top:10px;
+  font-size:12px;
+  color:var(--muted);
 }
 
-.btn.secondary {
-  background: #eaeaea;
-  color: #111;
+/* ===== Drawing area ===== */
+.drawSection{ align-self:start; }
+
+#canvas{
+  width:100%;
+  height:auto;
+  display:block;
+  background:#fff;
+  border:1px solid var(--line);
+  touch-action:none;
+  margin-top: 20px;
 }
 
-#canvas {
-  width: 20vw;
-  height: auto;
-  border-radius: 14px;
-  display: block;
-  touch-action: none;
-  background: #ffcfe7;
+.controls{ margin-top:14px; }
+
+.controlRow {
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
-.captionRow {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
+.titleInput{
+  width:100%;
+  padding:10px 12px;
+  margin-top:10px;
+  /* border:1px solid var(--line); */
+  border-radius:10px;
+  background:#fff;
+  font-size:14px;
 }
 
 #caption {
-  flex: 1;
-  border: 1px solid rgba(0,0,0,0.12);
-  border-radius: 14px;
-  padding: 10px 12px;
-  font-size: 14px;
-  background: white;
+  border: none;
+  padding: 10px;
 }
 
-#status {
-  display: inline-block;
-  margin-top: 10px;
-  font-size: 13px;
-  color: rgba(0,0,0,0.70);
+.buttons{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
 }
 
-/* =========================
-   Gallery grid
-========================= */
+button{
+  padding:10px 16px;
+  border:0;
+  border-radius:12px;
+  background:#111;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  font-family: "Playfair Display", serif;
+}
 
-.envelopeGallery{
+button:hover{ opacity:.92; }
+
+/* ===== Palette ===== */
+.palette{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.swatch{
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  cursor:pointer;
+  border:2px solid rgba(0,0,0,.18);
+}
+
+.swatch.active{
+  outline:3px solid rgba(0,0,0,.7);
+  outline-offset:2px;
+}
+
+/* ===== Gallery grid ===== */
+.galleryGrid{
   display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap:18px;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:64px 72px;
   align-items:start;
-  margin-top: 12px;
 }
 
-/* =========================
-   Responsive Envelope Component
-   (no border-triangle sizing bugs)
-========================= */
-
-.envelopeWrap{
-  width: 100%;
-  max-width: 360px;
-  margin: 0 auto;
-  cursor: pointer;
-  user-select: none;
+/* each art item is NOT a modern card */
+.artCard{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  display:grid;
+  gap:14px;
 }
 
-.envelopeWrap .wrapper{
-  position: relative;
-  width: 100%;
-  height: 0;
-  padding-top: 66.6667%; /* 3:2 ratio */
-  border-radius: 18px;
-  background: #3760C9;
+/* ===== Frame stage ===== */
+.frameStage{
+  position:relative;
+  width:100%;
+  aspect-ratio:var(--stage-ratio, 3 / 2);
 }
 
-/* every direct child fills the wrapper */
-.envelopeWrap .wrapper > *{
+/* the window/opening that CLIPS art */
+.artWindow{
+  position: absolute;
+  left: var(--win-left, 10%);
+  right: var(--win-right, 10%);
+  top: var(--win-top, 15%);
+  bottom: var(--win-bottom, 15%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.artWindow img{
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Square that sizes based on frame orientation */
+.artSquare{
+  display:grid;
+  place-items:center;
+}
+
+/* vertical frames: limit by width */
+.frameStage[data-orient="v"] .artSquare{
+  width:100%;
+  height:auto;
+  aspect-ratio:1/1;
+}
+
+/* horizontal frames: limit by height */
+.frameStage[data-orient="h"] .artSquare{
+  height:100%;
+  width:auto;
+  aspect-ratio:1/1;
+}
+
+/* drawing image */
+.artSquare img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  transform:scale(.92);
+  transform-origin:center;
+}
+
+/* frame always on top */
+.frameImg{
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: -2;
 }
 
-/* Bottom flap (the missing triangle) */
-.envelopeWrap .bottom-flap{
-  background: #70bae9;
-  clip-path: polygon(0 100%, 50% 50%, 100% 100%);
-  z-index: 3;
+.backboard{
+  position: absolute;
+  background: #fff;
+  z-index: 0;
 }
 
-/* Left + right flaps (X shape) */
-.envelopeWrap .envelope{
-  z-index: 3;
+/* ===== Placard ===== */
+.placard{ padding-left:2px; }
+
+.placardTitle{
+  font-family:Georgia,serif;
+  font-size:18px;
+  font-weight:600;
+  line-height:1.15;
+  margin:0;
 }
 
-.envelopeWrap .envelope::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:#a4d4f2;
-  clip-path: polygon(0 0, 50% 50%, 0 100%);
+.placardMeta{
+  margin-top:6px;
+  font-size:13px;
+  color:var(--muted);
 }
 
-.envelopeWrap .envelope::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:#70bae9;
-  clip-path: polygon(100% 0, 50% 50%, 100% 100%);
-}
+/* ===== HARD SAFETY NET: prevents giant frame images taking over page ===== */
+.galleryGrid > *{ min-width:0; }
 
-/* Lids */
-.envelopeWrap .lid{
-  transform-origin: top;
-  transition: transform 0.25s linear;
-}
-
-.envelopeWrap .lid.one{
-  background:#658ced;
-  clip-path: polygon(0 0, 100% 0, 50% 50%);
-  z-index: 4;
-  transition-delay: 0.35s;
-}
-
-.envelopeWrap .lid.two{
-  background:#3760C9;
-  clip-path: polygon(0 0, 100% 0, 50% 50%);
-  z-index: 2; /* behind lid.one, above bottom */
-  transform: rotateX(90deg);
-  transition-delay: 0.2s;
-}
-
-/* Letter */
-.envelopeWrap .letter{
-  left: 9%;
-  right: 9%;
-  top: 10%;
-  bottom: 10%;
-  z-index: 2;
-  transition: transform 0.5s;
-}
-
-/* Paper (image + note) attached together */
-.envelopeWrap .paper{
+.frameStage{
   position: relative;
   width: 100%;
-  height: 100%;
-  background: white;
-  border-radius: 14px;
-  overflow: hidden;
+  aspect-ratio: var(--stage-ratio, 3 / 2);
 }
 
-.envelopeWrap .paper img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display:block;
+.frameImg{
+  max-width:100% !important;
+  max-height:100% !important;
 }
 
-/* Attached note strip */
-.envelopeWrap .note{
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 10px 12px;
-  font-size: 12px;
-  background: rgba(255,255,255,0.92);
-  border-top: 1px solid #f0f0f0;
-  color: #111;
-}
-
-/* Open animation */
-.envelopeWrap.open .lid.one{
-  transform: rotateX(90deg);
-  transition-delay: 0s;
-}
-.envelopeWrap.open .lid.two{
-  transform: rotateX(180deg);
-  transition-delay: 0.15s;
-}
-.envelopeWrap.open .letter{
-  transform: translateY(-75%);
-  transition-delay: 0.2s;
-}
-
-/* Flagged blur (optional) */
-.envelopeWrap.flagged .paper img{
-  filter: blur(10px) saturate(0.7);
-}
-
-/* Small polish */
-.envelopeWrap .wrapper{
-  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+/* global image sanity */
+img{
+  max-width:100%;
+  height:auto;
 }

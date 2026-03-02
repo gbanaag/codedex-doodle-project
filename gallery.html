@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Exhibition</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <a href="/index.html" class="navLink">← Back</a>
+      <h1>Exhibition</h1>
+      <div></div>
+    </header>
+
+    <main class="page">
+      <div id="gallery" class="galleryGrid"></div>
+      <!-- <div id="status" class="status"></div> -->
+    </main>
+
+    <script>
+      window.GALLERY_LIMIT = 200;
+      window.GALLERY_RANDOM = true;
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
