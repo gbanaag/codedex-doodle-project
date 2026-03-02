@@ -11,7 +11,7 @@ const BUCKET = "drawings";
 const TABLE = "drawings";
 
 /* =========================
-   DOM (safe across pages)
+   DOM 
 ========================= */
 const galleryEl = document.getElementById("gallery");
 const statusEl = document.getElementById("status");
@@ -24,16 +24,16 @@ const submitBtn = document.getElementById("submit");
 const clearBtn = document.getElementById("clear");
 const brushSizeEl = document.getElementById("brushSize");
 
+const marqueeEl = document.getElementById("marquee");
+const trackEl = document.getElementById("track");
+const row1 = document.getElementById("row1");
+const row2 = document.getElementById("row2");
+
 /* =========================
    Helpers
 ========================= */
-function setStatus(msg) {
-  if (statusEl) statusEl.textContent = msg;
-  console.log(msg);
-}
-
-function escapeHtml(str) {
-  return str.replace(/[&<>"']/g, (c) => ({
+function escapeHtml(str = "") {
+  return String(str).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
@@ -105,12 +105,6 @@ function addToGallery(publicUrl, caption, flagged, createdAt) {
   stage.style.setProperty("--win-top", frame.win.top + "%");
   stage.style.setProperty("--win-bottom", frame.win.bottom + "%");
 
-  // Optional: blur flagged
-  if (flagged) {
-    const img = wrap.querySelector(".artSquare img");
-    if (img) img.style.filter = "blur(10px) saturate(0.7)";
-  }
-
   galleryEl.prepend(wrap);
 
 }
@@ -121,7 +115,6 @@ async function loadGallery(limit = 40, randomize = false) {
   if (!galleryEl) return;
 
   try {
-    setStatus("Loading gallery...");
     galleryEl.innerHTML = "";
 
     // If randomizing, pull a bigger pool then shuffle client-side
@@ -144,15 +137,13 @@ async function loadGallery(limit = 40, randomize = false) {
       addToGallery(publicData.publicUrl, row.caption ?? "", !!row.flagged, row.created_at);
     }
 
-    setStatus(`Loaded ${rows.length} drawings.`);
   } catch (err) {
     console.error(err);
-    setStatus(`Gallery load failed ❌ ${err?.message ?? err}`);
   }
 }
 
 /* =========================
-   Drawing palette + canvas (only if canvas exists)
+   Drawing palette + canvas 
 ========================= */
 const PALETTE = ["#111111", "#E11D48", "#FB7185", "#F59E0B", "#10B981", "#3B82F6", "#fff"];
 let strokeColor = PALETTE[0];
@@ -189,7 +180,6 @@ function clearCanvas() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.restore();
-  setStatus("Cleared.");
 }
 clearCanvas();
 
@@ -285,6 +275,7 @@ function makeCenteredSquarePng(canvas, pad = 24) {
   const w = canvas.width, h = canvas.height;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   const img = ctx.getImageData(0, 0, w, h);
+  
 
   const bounds = findContentBounds(img, w, h);
   if (!bounds) return canvas; // blank
@@ -301,10 +292,6 @@ function makeCenteredSquarePng(canvas, pad = 24) {
   out.height = size;
   const octx = out.getContext("2d");
 
-  // white background
-  octx.fillStyle = "white";
-  octx.fillRect(0, 0, size, size);
-
   // center the crop into the square
   const dx = Math.floor((size - bw) / 2);
   const dy = Math.floor((size - bh) / 2);
@@ -320,13 +307,10 @@ function makeCenteredSquarePng(canvas, pad = 24) {
 
 async function submitDrawing() {
   if (!canvas || !ctx) {
-    setStatus("No canvas on this page.");
     return;
   }
 
   try {
-    setStatus("Uploading...");
-
     const caption = (captionEl?.value ?? "").trim().slice(0, 140);
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -360,23 +344,193 @@ async function submitDrawing() {
     clearCanvas();
     if (captionEl) captionEl.value = "";
 
-    setStatus("Added ✅");
   } catch (err) {
     console.error(err);
-    setStatus(`Failed ❌ ${err?.message ?? err}`);
   }
+}
+
+// Keep a set so we don't spam duplicates too much
+const seenPaths = new Set();
+
+function buildArtNode(publicUrl, title, flagged, createdAt, frame) {
+  const monthYear = createdAt
+    ? new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(new Date(createdAt))
+    : "";
+
+  const wrap = document.createElement("div");
+  wrap.className = "artCard";
+
+  wrap.innerHTML = `
+    <div class="frameStage">
+      <div class="artWindow">
+        <img src="${publicUrl}" alt="${escapeHtml(title)}" loading="lazy" />
+      </div>
+      <img class="frameImg" src="${frame.src}" alt="frame" />
+    </div>
+
+    <div class="placard">
+      <div class="placardTitle">${escapeHtml(title || "Untitled")}</div>
+      <div class="placardMeta">Anonymous${monthYear ? ` · ${monthYear}` : ""}</div>
+    </div>
+  `;
+
+  // Apply frame variables (uses your existing frame system)
+  const stage = wrap.querySelector(".frameStage");
+  stage.style.setProperty("--stage-ratio", frame.stageRatio);
+  stage.style.setProperty("--win-left", `${frame.win.left}%`);
+  stage.style.setProperty("--win-right", `${frame.win.right}%`);
+  stage.style.setProperty("--win-top", `${frame.win.top}%`);
+  stage.style.setProperty("--win-bottom", `${frame.win.bottom}%`);
+
+  // Optional blur
+  // if (flagged) {
+  //   const img = wrap.querySelector(".artWindow img");
+  //   if (img) img.style.filter = "blur(10px) saturate(0.7)";
+  // }
+
+  return wrap;
+}
+
+async function fetchRandomRows(count = 200) {
+  // Pull a pool, shuffle client-side, slice.
+  // Adjust pool size if needed; bigger = more random but more data.
+  const poolSize = Math.max(600, count * 3);
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("path, caption, flagged, created_at")
+    .order("created_at", { ascending: false })
+    .limit(poolSize);
+
+  if (error) throw error;
+
+  const shuffled = shuffleArray(data ?? []);
+  const picked = [];
+
+  for (const row of shuffled) {
+    if (picked.length >= count) break;
+    if (!row?.path) continue;
+    if (seenPaths.has(row.path)) continue;
+    seenPaths.add(row.path);
+    picked.push(row);
+  }
+
+  return picked;
+}
+
+async function repeatMarquee(count = 200) {
+  try {
+    if (!row1 || !row2) {
+      return;
+    }
+
+    const existing =
+      row1.querySelectorAll(".artCard").length +
+      row2.querySelectorAll(".artCard").length;
+
+    if (existing === 0) {
+      const rows = await fetchRandomRows(count);
+
+      if (!rows.length) {
+        return;
+      }
+
+      rows.forEach((row, idx) => {
+        if (!row?.path) return;
+
+        const { data: publicData } = supabase.storage.from(BUCKET).getPublicUrl(row.path);
+
+        const frame = (typeof pickFrameForPath === "function")
+          ? pickFrameForPath(row.path)
+          : pickRandomFrame();
+
+        const node = buildArtNode(
+          publicData.publicUrl,
+          row.caption ?? "",
+          !!row.flagged,
+          row.created_at,
+          frame
+        );
+
+        (idx % 2 === 0 ? row1 : row2).appendChild(node);
+      });
+
+      return;
+    }
+
+    // REPEAT
+
+    const frag1 = document.createDocumentFragment();
+    const frag2 = document.createDocumentFragment();
+
+    row1.querySelectorAll(".artCard").forEach((card) => frag1.appendChild(card.cloneNode(true)));
+    row2.querySelectorAll(".artCard").forEach((card) => frag2.appendChild(card.cloneNode(true)));
+
+    row1.appendChild(frag1);
+    row2.appendChild(frag2);
+
+    setStatus(`Repeated. Total now ${row1.children.length + row2.children.length}`);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function startHorizontalMarquee() {
+  if (!marqueeEl || !trackEl || !row1 || !row2) return;
+
+  let x = 0;
+  let last = performance.now();
+  let paused = false;
+
+  const speed = 35;
+
+  marqueeEl.addEventListener("mouseenter", () => (paused = true));
+  marqueeEl.addEventListener("mouseleave", () => (paused = false));
+
+  function step(now) {
+    const dt = (now - last) / 1000;
+    last = now;
+
+    if (!paused && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      x += speed * dt;
+      trackEl.style.transform = `translateX(${-x}px)`;
+    }
+
+    const viewportW = marqueeEl.clientWidth;
+    const trackW = Math.max(row1.scrollWidth, row2.scrollWidth);
+
+    if (trackW - x < viewportW * 2.5) {
+      if (!trackEl.dataset.repeating) {
+        trackEl.dataset.repeating = "1";
+        repeatMarquee();
+        setTimeout(() => delete trackEl.dataset.repeating, 200);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
 }
 
 /* =========================
    Init
 ========================= */
-(function init() {
-  // Gallery: always load if the element exists
+async function init() {
+  // 1) Marquee mode takes over the page if enabled
+  if (window.MARQUEE_MODE && marqueeEl && trackEl && row1 && row2) {
+    const first = Number(window.MARQUEE_BATCH ?? 200);
+
+    await repeatMarquee(first);
+    startHorizontalMarquee();
+    return;
+  }
+
+  // 2) Normal gallery mode (grid)
   const limit = Number(window.GALLERY_LIMIT ?? 40);
   const randomize = Boolean(window.GALLERY_RANDOM ?? false);
-  if (galleryEl) loadGallery(limit, randomize);
+  if (galleryEl) await loadGallery(limit, randomize);
 
-  // Canvas: only if canvas exists
+  // 3) Canvas page stuff
   if (canvas) {
     ctx = canvas.getContext("2d", { willReadFrequently: true });
 
@@ -393,8 +547,12 @@ async function submitDrawing() {
   submitBtn?.addEventListener("click", submitDrawing);
   clearBtn?.addEventListener("click", clearCanvas);
 
-  // Optional: expose for onclick usage
+  // Optional globals
   window.loadGallery = loadGallery;
   window.submitDrawing = submitDrawing;
   window.clearCanvas = clearCanvas;
-})();
+}
+
+init().catch((err) => {
+  console.error(err);
+});

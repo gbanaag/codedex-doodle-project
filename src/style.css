@@ -55,11 +55,11 @@ a {
   .layout{ grid-template-columns:1fr; }
 }
 
-.page{
+/* .page{
   max-width:1200px;
   margin:30px auto;
   padding:0 20px 40px;
-}
+} */
 
 .sectionTitle{
   margin:0 0 12px 0;
@@ -188,8 +188,8 @@ button:hover{ opacity:.92; }
 }
 
 .artWindow img{
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 90%;
+  max-height: 90%;
   object-fit: contain;
   display: block;
 }
@@ -242,7 +242,11 @@ button:hover{ opacity:.92; }
 }
 
 /* ===== Placard ===== */
-.placard{ padding-left:2px; }
+.placard{ 
+  /* padding-left:2px;  */
+  background-color: white;
+  padding: 10px;
+}
 
 .placardTitle{
   font-family:Georgia,serif;
@@ -258,7 +262,6 @@ button:hover{ opacity:.92; }
   color:var(--muted);
 }
 
-/* ===== HARD SAFETY NET: prevents giant frame images taking over page ===== */
 .galleryGrid > *{ min-width:0; }
 
 .frameStage{
@@ -272,8 +275,37 @@ button:hover{ opacity:.92; }
   max-height:100% !important;
 }
 
-/* global image sanity */
 img{
   max-width:100%;
   height:auto;
 }
+
+/* ===== Horizontal marquee gallery ===== */
+.marquee{
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  position: relative;
+  padding: 24px 0;
+}
+
+.track{
+  display: grid;
+  gap: 26px;
+  padding: 18px 20px;
+  will-change: transform;
+}
+
+/* each row is a horizontal flex strip */
+.track .row{
+  display: flex;
+  gap: 70px;
+}
+
+/* each artwork tile width */
+.track .row .artCard{
+  flex: 0 0 auto;
+  margin: 10px;
+  /* width: clamp(220px, 22vw, 320px); */
+}
+
